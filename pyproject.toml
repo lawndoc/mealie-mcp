@@ -1,0 +1,15 @@
+[project]
+name = "mealie-mcp"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "httpx>=0.28.1",
+    "mcp[cli]>=1.6.0",
+]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+]
