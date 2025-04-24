@@ -29,12 +29,19 @@ The application requires the following environment variables:
 - `MEALIE_USERNAME`: Your Mealie service account's username
 - `MEALIE_PASSWORD`: Your Mealie service account's password
 
+Optional logging configuration:
+
+- `MEALIE_MCP_LOG_LEVEL`: Controls logging verbosity (DEBUG, INFO, WARNING, ERROR, CRITICAL). Defaults to INFO.
+- `MEALIE_MCP_LOG_FILE`: Optional path to a log file. If not set, logs will only be output to the console.
+
 Example setup:
 
 ```bash
 export MEALIE_URL="https://mealie.yourdomain.com"
 export MEALIE_USERNAME="username" 
 export MEALIE_PASSWORD="example_password"
+export MEALIE_MCP_LOG_LEVEL="DEBUG"
+export MEALIE_MCP_LOG_FILE="/var/log/mealie-mcp.log"
 ```
 
 ## Features
