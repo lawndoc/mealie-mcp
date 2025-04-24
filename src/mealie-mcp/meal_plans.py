@@ -1,6 +1,7 @@
 from . import mcp
 from mcp.server.fastmcp import Context
 from typing import Any, Dict, List
+from .log import logger
 
 
 @mcp.resource("mealie://meal-plans")
@@ -33,9 +34,16 @@ async def list_all_meal_plans(ctx: Context) -> List[Dict[str, Any]]:
             "previous": "string"
         }
     """
-    resp = await ctx.client.get("/api/meal-plans")
-    resp.raise_for_status()
-    return resp.json()
+    logger.info("Fetching all meal plans")
+    try:
+        resp = await ctx.request_context.lifespan_context.client.get("/api/meal-plans")
+        resp.raise_for_status()
+        meal_plans = resp.json()
+        logger.info(f"Retrieved meal plans: {meal_plans.get('total', 0)} total entries")
+        return meal_plans
+    except Exception as e:
+        logger.error(f"Failed to fetch meal plans: {str(e)}")
+        raise
 
 
 @mcp.tool()
@@ -50,13 +58,23 @@ async def create_random_meal(ctx: Context, date: str, meal_type: str) -> Dict[st
     Returns:
         - The created MealPlanEntry object, as returned by Mealie.
     """
-    payload: Dict[str, Any] = {
-        "date": date,
-        "entryType": meal_type,
-    }
-    resp = await ctx.client.post("/api/households/mealplans/random", json=payload)
-    resp.raise_for_status()
-    return resp.json()
+    logger.info(f"Creating random meal for {date} ({meal_type})")
+    try:
+        payload: Dict[str, Any] = {
+            "date": date,
+            "entryType": meal_type,
+        }
+        resp = await ctx.request_context.lifespan_context.client.post(
+            "/api/households/mealplans/random", json=payload
+        )
+        resp.raise_for_status()
+        result = resp.json()
+        recipe_name = result.get("recipe", {}).get("name", "Unknown recipe")
+        logger.info(f"Successfully added random meal: {recipe_name} for {date} ({meal_type})")
+        return result
+    except Exception as e:
+        logger.error(f"Failed to create random meal for {date} ({meal_type}): {str(e)}")
+        raise
 
 
 @mcp.tool()
@@ -74,12 +92,21 @@ async def add_recipe_to_meal_plan(
     Returns:
       - The created MealPlanEntry object, as returned by Mealie.
     """
-    payload: Dict[str, Any] = {
-        "date": date,
-        "entryType": meal_type,
-        "recipeId": recipe_id,
-    }
+    logger.info(f"Adding recipe {recipe_id} to meal plan for {date} ({meal_type})")
+    try:
+        payload: Dict[str, Any] = {
+            "date": date,
+            "entryType": meal_type,
+            "recipeId": recipe_id,
+        }
 
-    resp = await ctx.client.post(f"/api/households/mealplans", json=payload)
-    resp.raise_for_status()
-    return resp.json()
+        resp = await ctx.request_context.lifespan_context.client.post(
+            "/api/households/mealplans", json=payload
+        )
+        resp.raise_for_status()
+        result = resp.json()
+        logger.info(f"Successfully added recipe {recipe_id} to meal plan for {date} ({meal_type})")
+        return result
+    except Exception as e:
+        logger.error(f"Failed to add recipe {recipe_id} to meal plan for {date} ({meal_type}): {str(e)}")
+        raise
