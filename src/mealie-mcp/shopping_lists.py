@@ -1,7 +1,7 @@
 from . import mcp
 from mcp.server.fastmcp import Context
 from typing import Any, Dict, List
-from .log import logger
+from mealie_logger import logger
 
 
 @mcp.resource("mealie://shopping-lists")

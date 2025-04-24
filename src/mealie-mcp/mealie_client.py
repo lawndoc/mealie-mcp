@@ -1,6 +1,6 @@
 import httpx
 import os
-from .log import logger
+from mealie_logger import logger
 
 
 class MealieClient:

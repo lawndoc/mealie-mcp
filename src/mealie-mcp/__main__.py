@@ -2,8 +2,8 @@ from dataclasses import dataclass
 from contextlib import asynccontextmanager
 from collections.abc import AsyncIterator
 from mcp.server.fastmcp import FastMCP
-from .mealie_client import MealieClient
-from .log import logger
+from mealie_client import MealieClient
+from mealie_logger import logger
 
 
 @dataclass
