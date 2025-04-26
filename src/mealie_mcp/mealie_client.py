@@ -1,12 +1,13 @@
 import httpx
 import os
-from mealie_logger import logger
+from .mealie_logger import logger
 
 
 class MealieClient:
     """
     Wrapper around httpx.AsyncClient that handles token expiration and automatic reauthentication.
-    """ 
+    """
+
     async def __aenter__(self):
         self.base_url = os.environ.get("MEALIE_URL", "").rstrip("/")
         self.headers = {"Content-Type": "application/json"}
@@ -14,7 +15,7 @@ class MealieClient:
         logger.info(f"Initialized MealieClient with base URL: {self.base_url}")
         await self._reauthenticate()
         return self
-        
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         logger.info("Closing MealieClient")
         await self.client.aclose()
@@ -41,7 +42,9 @@ class MealieClient:
                 auth_response.raise_for_status()
                 token = auth_response.json().get("access_token")
             self.headers["Authorization"] = f"Bearer {token}"
-            self.client = httpx.AsyncClient(base_url=self.base_url, headers=self.headers)
+            self.client = httpx.AsyncClient(
+                base_url=self.base_url, headers=self.headers
+            )
             logger.info("Authentication successful")
         except Exception as e:
             logger.error(f"Authentication failed: {str(e)}")
@@ -60,12 +63,14 @@ class MealieClient:
                 await self._reauthenticate()
                 logger.debug(f"Retrying {method} request to {url}")
                 response = await self.client.request(method, url, **kwargs)
-            
+
             if not response.is_success:
-                logger.error(f"Request failed with status {response.status_code}: {response.text}")
+                logger.error(
+                    f"Request failed with status {response.status_code}: {response.text}"
+                )
             else:
                 logger.debug(f"Request successful: {response.status_code}")
-                
+
             return response
 
         except httpx.HTTPStatusError as e:

@@ -1,5 +1,5 @@
 [project]
-name = "mealie-mcp"
+name = "mealie_mcp"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -13,3 +13,13 @@ dependencies = [
 dev = [
     "black>=25.1.0",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mealie_mcp"]
+
+[project.scripts]
+mealie_mcp = "mealie_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

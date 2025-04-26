@@ -13,13 +13,20 @@ This project provides a MCP wrapper around the Mealie API, allowing AI assistant
 - Working with shopping lists
 - Adding meal plan recipe ingredients to shopping lists
 
-## Installing
+## Usage
+
+### Running the MCP Server
 
 ```bash
 git clone https://github.com/lawndoc/mealie-mcp
+cd mealie-mcp
 uv venv
-uv run python src/mealie-mcp/__main__.py
+uv run mealie_mcp
 ```
+
+### Client Usage Examples
+
+TODO
 
 ## Configuration
 
@@ -76,28 +83,7 @@ Tools:
 
 - Add a recipe's ingredients to a specific shopping list
 
-## Usage
-
-### Running the MCP Server
-
-```bash
-uv run mealie-mcp
-```
-
-### Client Usage Examples
-
-TODO
-
 ## Development
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/mealie-mcp.git
-cd mealie-mcp
-
-# Create a virtual environment
-uv venv
-```
 
 Use black for standardized formatting before contributing changes
 

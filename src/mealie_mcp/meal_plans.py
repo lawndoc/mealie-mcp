@@ -1,10 +1,10 @@
-from . import mcp
 from mcp.server.fastmcp import Context
 from typing import Any, Dict, List
-from mealie_logger import logger
+from .mealie_logger import logger
+from .server import mcp
 
 
-@mcp.resource("mealie://meal-plans")
+@mcp.tool()
 async def list_all_meal_plans(ctx: Context) -> List[Dict[str, Any]]:
     """
     Retrieve all recipes scheduled on the meal plan.
@@ -70,7 +70,9 @@ async def create_random_meal(ctx: Context, date: str, meal_type: str) -> Dict[st
         resp.raise_for_status()
         result = resp.json()
         recipe_name = result.get("recipe", {}).get("name", "Unknown recipe")
-        logger.info(f"Successfully added random meal: {recipe_name} for {date} ({meal_type})")
+        logger.info(
+            f"Successfully added random meal: {recipe_name} for {date} ({meal_type})"
+        )
         return result
     except Exception as e:
         logger.error(f"Failed to create random meal for {date} ({meal_type}): {str(e)}")
@@ -105,8 +107,12 @@ async def add_recipe_to_meal_plan(
         )
         resp.raise_for_status()
         result = resp.json()
-        logger.info(f"Successfully added recipe {recipe_id} to meal plan for {date} ({meal_type})")
+        logger.info(
+            f"Successfully added recipe {recipe_id} to meal plan for {date} ({meal_type})"
+        )
         return result
     except Exception as e:
-        logger.error(f"Failed to add recipe {recipe_id} to meal plan for {date} ({meal_type}): {str(e)}")
+        logger.error(
+            f"Failed to add recipe {recipe_id} to meal plan for {date} ({meal_type}): {str(e)}"
+        )
         raise

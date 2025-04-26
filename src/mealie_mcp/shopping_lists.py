@@ -1,10 +1,10 @@
-from . import mcp
 from mcp.server.fastmcp import Context
 from typing import Any, Dict, List
-from mealie_logger import logger
+from .mealie_logger import logger
+from .server import mcp
 
 
-@mcp.resource("mealie://shopping-lists")
+@mcp.tool()
 async def get_all_shopping_lists(ctx: Context) -> List[Dict[str, Any]]:
     """
     Retrieve every shopping list in the household.
@@ -24,7 +24,7 @@ async def get_all_shopping_lists(ctx: Context) -> List[Dict[str, Any]]:
         raise
 
 
-@mcp.resource("mealie://shopping-lists/{list_id}")
+@mcp.tool()
 async def get_shopping_list_contents(ctx: Context, list_id: str) -> Dict[str, Any]:
     """
     Fetch the details (contents) of a single shopping list.
@@ -58,7 +58,9 @@ async def get_shopping_list_contents(ctx: Context, list_id: str) -> Dict[str, An
         resp.raise_for_status()
         shopping_list = resp.json()
         item_count = len(shopping_list.get("items", []))
-        logger.info(f"Retrieved shopping list '{shopping_list.get('name', 'Unknown')}' with {item_count} items")
+        logger.info(
+            f"Retrieved shopping list '{shopping_list.get('name', 'Unknown')}' with {item_count} items"
+        )
         return shopping_list
     except Exception as e:
         logger.error(f"Failed to fetch shopping list {list_id}: {str(e)}")
@@ -94,8 +96,10 @@ async def add_recipe_ingredients_to_list(
     """
     recipe_id = recipe_params.get("recipeId", "unknown")
     quantity = recipe_params.get("recipeIncrementQuantity", 1)
-    logger.info(f"Adding recipe {recipe_id} ingredients (quantity: {quantity}) to shopping list {shopping_list_id}")
-    
+    logger.info(
+        f"Adding recipe {recipe_id} ingredients (quantity: {quantity}) to shopping list {shopping_list_id}"
+    )
+
     try:
         url = f"/api/households/shopping/lists/{shopping_list_id}/recipe"
         resp = await ctx.request_context.lifespan_context.client.post(
@@ -104,8 +108,12 @@ async def add_recipe_ingredients_to_list(
         resp.raise_for_status()
         result = resp.json()
         item_count = len(result.get("items", []))
-        logger.info(f"Successfully added recipe ingredients to shopping list. List now has {item_count} items")
+        logger.info(
+            f"Successfully added recipe ingredients to shopping list. List now has {item_count} items"
+        )
         return result
     except Exception as e:
-        logger.error(f"Failed to add recipe {recipe_id} ingredients to shopping list {shopping_list_id}: {str(e)}")
+        logger.error(
+            f"Failed to add recipe {recipe_id} ingredients to shopping list {shopping_list_id}: {str(e)}"
+        )
         raise

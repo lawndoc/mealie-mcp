@@ -1,10 +1,10 @@
-from . import mcp
 from mcp.server.fastmcp import Context
 from typing import Any, Dict, List
-from mealie_logger import logger
+from .mealie_logger import logger
+from .server import mcp
 
 
-@mcp.resource("mealie://recipes")
+@mcp.tool()
 async def list_recipes(ctx: Context) -> List[Dict[str, Any]]:
     """
     Retrieve all recipes from Mealie.
@@ -22,7 +22,7 @@ async def list_recipes(ctx: Context) -> List[Dict[str, Any]]:
         raise
 
 
-@mcp.resource("mealie://recipes/search/{query}")
+@mcp.tool()
 async def search_recipes(ctx: Context, query: str) -> List[Dict[str, Any]]:
     """
     Search recipes by name or ingredient.
@@ -35,7 +35,9 @@ async def search_recipes(ctx: Context, query: str) -> List[Dict[str, Any]]:
     """
     logger.info(f"Searching for recipes with query: {query}")
     try:
-        resp = await ctx.request_context.lifespan_context.client.get("/api/recipes/search", params={"query": query})
+        resp = await ctx.request_context.lifespan_context.client.get(
+            "/api/recipes/search", params={"query": query}
+        )
         resp.raise_for_status()
         recipes = resp.json()
         logger.info(f"Found {len(recipes)} recipes matching query '{query}'")
@@ -45,7 +47,7 @@ async def search_recipes(ctx: Context, query: str) -> List[Dict[str, Any]]:
         raise
 
 
-@mcp.resource("mealie://recipes/{recipe_id}")
+@mcp.tool()
 async def get_recipe(ctx: Context, recipe_id: str) -> Dict[str, Any]:
     """
     Fetch the details of a single recipe by its ID.
