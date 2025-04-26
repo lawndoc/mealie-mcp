@@ -8,7 +8,9 @@ from .server import mcp
 async def list_recipes(ctx: Context) -> List[Dict[str, Any]]:
     """
     Retrieve all recipes from Mealie.
-    Returns a list of recipe summaries.
+
+    Returns:
+      - A list of recipe summary objects, as returned by the /api/recipes endpoint.
     """
     logger.info("Fetching all recipes")
     try:
