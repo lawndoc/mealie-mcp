@@ -124,8 +124,10 @@ jobs:
           push-to-registry: true
 
       - name: Update release
+        if: ${{ steps.changed.outcome == 'success' }}
         uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174 # v1
         with:
           allowUpdates: true
           updateOnlyUnreleased: true
           generateReleaseNotes: true
+          tag: ${{ steps.version.outputs.new_tag }}
