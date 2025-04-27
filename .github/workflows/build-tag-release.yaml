@@ -9,11 +9,9 @@ on:
       - .gitignore
       - .github/renovate.json
       - .pre-commit-config.yaml
-      - README.MD
       - LICENSE
+      - README.MD
   pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 env:
@@ -23,16 +21,13 @@ env:
 jobs:
   bump-tag:
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
     permissions:
       contents: write
     steps:
-      - name: Install uv
-        uses: astral-sh/setup-uv@c7f87aa956e4c323abf06d5dec078e358f6b4d04 # v6
-
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
-          ref: ${{ github.head_ref }}
+          fetch-depth: 0
 
       - name: Get next version
         id: version
@@ -41,6 +36,9 @@ jobs:
           WITH_V: true
           DEFAULT_BUMP: patch
           DRY_RUN: true
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@c7f87aa956e4c323abf06d5dec078e358f6b4d04 # v6
 
       - name: Bump version in files
         run: |
