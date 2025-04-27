@@ -24,7 +24,7 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         raise
     finally:
         logger.info("Shutting down Mealie MCP server")
-        
+
 
 mcp = FastMCP("Mealie", lifespan=app_lifespan)
 from . import meal_plans

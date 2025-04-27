@@ -11,7 +11,6 @@ on:
       - .pre-commit-config.yaml
       - LICENSE
       - README.MD
-  pull_request:
   workflow_dispatch:
 
 env:
@@ -21,9 +20,12 @@ env:
 jobs:
   bump-tag:
     runs-on: ubuntu-latest
-    if: ${{ github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch') }}
+    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' }}
     permissions:
       contents: write
+      packages: write
+      attestations: write
+      id-token: write
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -36,41 +38,39 @@ jobs:
           WITH_V: true
           DEFAULT_BUMP: patch
           DRY_RUN: true
+
+      - name: Check if version changed
+        id: changed
+        continue-on-error: true
+        run: |
+          echo "${{ steps.version.outputs.new_tag != steps.version.outputs.old_tag }}"
           
       - name: Install uv
+        if: ${{ steps.changed.outcome == 'success' }}
         uses: astral-sh/setup-uv@c7f87aa956e4c323abf06d5dec078e358f6b4d04 # v6
 
       - name: Bump version in files
+        if: ${{ steps.changed.outcome == 'success' }}
         run: |
           version="${{ steps.version.outputs.new_tag }}"
           clean_version="${version#v}"
-          sed -i "s/__version__ = .*/__version__ = \"${clean_version}\"/" src/mealie_mcp/__init__.py
-          sed -i "s/version = .*/version = \"${clean_version}\"/" src/pyproject.toml
-          uv lock --upgrade-package mealie-mcp --directory src
+          sed -i "s/__version__ = .*/__version__ = \"${clean_version}\"/" mealie_mcp/__init__.py
+          sed -i "s/version = .*/version = \"${clean_version}\"/" pyproject.toml
+          uv lock --upgrade-package mealie-mcp
 
       - name: Commit changes
+        if: ${{ steps.changed.outcome == 'success' }}
+        id: commit
         uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:
           commit_message: automated version bump
 
       - name: Push version tag
+        if: ${{ steps.changed.outcome == 'success' }}
         uses: anothrNick/github-tag-action@f278d49d30cdd8775cc3e7dd00b5ee11686ee297 # 1.71.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CUSTOM_TAG: ${{ steps.version.outputs.new_tag }}
-
-  build-and-push-image:
-    if: ${{ always() && (contains(needs.*.result, 'skipped') || contains(needs.*.result, 'success')) }}
-    needs: bump-tag
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-      attestations: write
-      id-token: write
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: Log in to the Container registry
         uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3
@@ -79,17 +79,18 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta
-        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3
+
+      - name: Generate metadata for published image
+        id: meta
+        run: |
+          TAG=${{ steps.version.outputs.new_tag }}
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+          echo "timestamp=$(date -u +'%Y-%m-%dT%H:%M:%S.000Z')" >> $GITHUB_OUTPUT
 
       - name: Build and push Docker image
         id: push
@@ -97,12 +98,20 @@ jobs:
         with:
           context: ./src
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+            ${{ steps.changed.outcome == 'success' && format('{0}/{1}:latest', env.REGISTRY, env.IMAGE_NAME) || null }}
+            ${{ steps.changed.outcome == 'success' && format('{0}/{1}:{2}', env.REGISTRY, env.IMAGE_NAME, steps.version.outputs.new_tag) || null }}
+          labels: |
+            org.opencontainers.image.title=${{ github.event.repository.name }}
+            org.opencontainers.image.url=${{ github.repositoryUrl }}
+            org.opencontainers.image.source=${{ github.repositoryUrl }}
+            org.opencontainers.image.version=${{ steps.meta.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.commit.outputs.commit_hash }}
+            org.opencontainers.image.created=${{ steps.meta.outputs.timestamp }}
 
       - name: Generate artifact attestation
-        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
         uses: actions/attest-build-provenance@c074443f1aee8d4aeeae555aebba3282517141b2 # v2
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
@@ -110,7 +119,6 @@ jobs:
           push-to-registry: true
 
       - name: Update release
-        if: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
         uses: ncipollo/release-action@440c8c1cb0ed28b9f43e4d1d670870f059653174 # v1
         with:
           allowUpdates: true
