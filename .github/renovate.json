@@ -1,0 +1,30 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "config:recommended",
+        ":approveMajorUpdates",
+        ":configMigration",
+        ":docker",
+        ":prHourlyLimitNone",
+        ":timezone(America/Chicago)",
+        "helpers:pinGitHubActionDigests"
+    ],
+    "packageRules": [
+        {
+            "groupName": "all non-major versions (auto-merge)",
+            "groupSlug": "auto-merge-minor-patch",
+            "automerge": true,
+            "automergeType": "pr",
+            "automergeComment": "Automerge enabled for this PR.",
+            "extends": [
+                "schedule:automergeDaily"
+            ],
+            "matchUpdateTypes": [
+                "patch"
+            ],
+            "matchPackageNames": [
+                "*"
+            ]
+        }
+    ]
+}
