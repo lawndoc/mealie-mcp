@@ -27,6 +27,9 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Install uv
+        uses: astral-sh/setup-uv@c7f87aa956e4c323abf06d5dec078e358f6b4d04 # v6
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           ref: ${{ github.head_ref }}
@@ -38,9 +41,6 @@ jobs:
           WITH_V: true
           DEFAULT_BUMP: patch
           DRY_RUN: true
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@c7f87aa956e4c323abf06d5dec078e358f6b4d04 # v6
 
       - name: Bump version in files
         run: |
@@ -62,6 +62,8 @@ jobs:
           CUSTOM_TAG: ${{ steps.version.outputs.new_tag }}
 
   build-and-push-image:
+    if: ${{ always() && (contains(needs.*.result, 'skipped') || contains(needs.*.result, 'success')) }}
+    needs: bump-tag
     runs-on: ubuntu-latest
     permissions:
       contents: write
