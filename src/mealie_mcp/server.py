@@ -36,7 +36,7 @@ from . import shopping_lists
 @click.option(
     "--transport",
     type=click.Choice(["stdio", "sse"]),
-    default="sse",
+    default="sse",  # port 8000
     help="Transport type",
 )
 def main(transport: str = "sse") -> None:
