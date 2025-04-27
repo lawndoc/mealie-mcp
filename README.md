@@ -18,15 +18,25 @@ This project provides a MCP wrapper around the Mealie API, allowing AI assistant
 ### Running the MCP Server
 
 ```bash
-git clone https://github.com/lawndoc/mealie-mcp
-cd mealie-mcp
-uv venv
-uv run mealie_mcp
+curl -o .env https://raw.githubusercontent.com/lawndoc/mealie-mcp/refs/heads/main/.env.template
+vim .env
+docker run -d --rm -p 8000:8000 --env-file .env ghcr.io/lawndoc/mealie-mcp:latest
 ```
 
 ### Client Usage Examples
 
-TODO
+MCP client config:
+
+```json
+"mcp": {
+    "servers": {
+        "mealie-mcp": {
+            "type": "sse",
+            "url": "http://localhost:8000/sse"
+        }
+    }
+}
+```
 
 ## Configuration
 
@@ -44,63 +54,51 @@ Optional logging configuration:
 Example setup:
 
 ```bash
-export MEALIE_URL="https://mealie.yourdomain.com"
-export MEALIE_USERNAME="username" 
-export MEALIE_PASSWORD="example_password"
-export MEALIE_MCP_LOG_LEVEL="DEBUG"
-export MEALIE_MCP_LOG_FILE="/var/log/mealie-mcp.log"
+MEALIE_URL="https://mealie.yourdomain.com"
+MEALIE_USERNAME="username" 
+MEALIE_PASSWORD="example_password"
+MEALIE_MCP_LOG_LEVEL="DEBUG"
+MEALIE_MCP_LOG_FILE="/var/log/mealie-mcp.log"
 ```
 
 ## Features
 
 ### Recipe Management
 
-Resources:
+Tools:
 
 - List all recipes in your Mealie instance
-- Search recipes by name or ingredients
 - Get detailed information about specific recipes
+- Search recipes by name or ingredients
 
 ### Meal Planning
 
-Resources:
-
-- View all meal plans
-
 Tools:
 
+- List all meals scheduled on the meal plan
 - Add a random recipe to a meal in your plan
 - Add specific recipes to a meal in your plan
 
 ### Shopping Lists
 
-Resources:
-
-- Retrieve all shopping lists
-- Get detailed contents of a specific shopping list
-
 Tools:
 
+- List all shopping lists
+- Get detailed contents of a specific shopping list
 - Add a recipe's ingredients to a specific shopping list
 
 ## Development
 
-Use black for standardized formatting before contributing changes
+You must use [`uv`](https://docs.astral.sh/uv/) while developing this app.
+
+### Setup
 
 ```bash
-uv run black src/
+git clone https://github.com/lawndoc/mealie-mcp
+cd mealie-mcp
+uv sync
 ```
 
 ## Technical Details
 
 The project implements a custom HTTPX client wrapper that automatically handles authentication and token refreshing. If a request fails due to an expired token, the client will reauthenticate and retry the request transparently.
-
-## Requirements
-
-- Python 3.10+
-- HTTPX 0.28.1+
-- MCP 1.6.0+
-
-## License
-
-[Add license information here]
