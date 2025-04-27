@@ -43,7 +43,12 @@ jobs:
         id: changed
         continue-on-error: true
         run: |
-          echo "${{ steps.version.outputs.new_tag != steps.version.outputs.old_tag }}"
+          if ["${{ steps.version.outputs.new_tag }}" == "${{ steps.version.outputs.old_tag }}" ]; then
+            echo "Version not changed"
+            exit 1
+          else
+            echo "Version changed"
+          fi
           
       - name: Install uv
         if: ${{ steps.changed.outcome == 'success' }}
@@ -96,7 +101,7 @@ jobs:
         id: push
         uses: docker/build-push-action@14487ce63c7a62a4a324b0bfb37086795e31c6c1 # v6
         with:
-          context: ./src
+          context: .
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
