@@ -2,7 +2,6 @@
 name = "mealie_mcp"
 version = "0.0.2"
 description = "A Model Context Protocol server for Mealie"
-readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
     "httpx>=0.28.1",
@@ -16,7 +15,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/mealie_mcp"]
+packages = ["mealie_mcp"]
 
 [project.scripts]
 mealie_mcp = "mealie_mcp.server:main"

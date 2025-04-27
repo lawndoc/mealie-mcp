@@ -45,8 +45,8 @@ jobs:
           version="${{ steps.version.outputs.new_tag }}"
           clean_version="${version#v}"
           sed -i "s/__version__ = .*/__version__ = \"${clean_version}\"/" src/mealie_mcp/__init__.py
-          sed -i "s/version = .*/version = \"${clean_version}\"/" pyproject.toml
-          uv lock --upgrade-package mealie-mcp
+          sed -i "s/version = .*/version = \"${clean_version}\"/" src/pyproject.toml
+          uv lock --upgrade-package mealie-mcp --directory src
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
