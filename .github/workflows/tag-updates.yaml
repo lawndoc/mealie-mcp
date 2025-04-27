@@ -30,6 +30,9 @@ jobs:
           DEFAULT_BUMP: patch
           DRY_RUN: true
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@c7f87aa956e4c323abf06d5dec078e358f6b4d04 # v6
+
       - name: Bump version in files
         run: |
           version="${{ steps.version.outputs.new_tag }}"
