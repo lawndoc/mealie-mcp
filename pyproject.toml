@@ -1,7 +1,7 @@
 [project]
 name = "mealie_mcp"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Model Context Protocol server for Mealie"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
