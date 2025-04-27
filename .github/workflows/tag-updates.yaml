@@ -35,7 +35,7 @@ jobs:
           version="${{ steps.version.outputs.new_tag }}"
           clean_version="${version#v}"
           sed -i "s/__version__ = .*/__version__ = \"${clean_version}\"/" src/mealie_mcp/__init__.py
-          sed -i "s/release = .*/release = \"${clean_version}\"/" docs/conf.py
+          sed -i "s/version = .*/version = \"${clean_version}\"/" pyproject.toml
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
@@ -45,5 +45,5 @@ jobs:
       - name: Push version tag
         uses: anothrNick/github-tag-action@f278d49d30cdd8775cc3e7dd00b5ee11686ee297 # 1.71.0
         env:
-          GITHUB_TOKEN: ${{ secrets.TAG_PUSH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.REPO_WRITE_PAT }}
           CUSTOM_TAG: ${{ steps.version.outputs.new_tag }}
