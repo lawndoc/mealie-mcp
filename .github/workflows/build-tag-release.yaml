@@ -43,7 +43,7 @@ jobs:
         id: changed
         continue-on-error: true
         run: |
-          if [[ "${{ steps.version.outputs.new_tag }}" == "${{ steps.version.outputs.old_tag }}" || "${{ steps.version.outputs.old_tag }}" == "" ]]; then
+          if [[ "${{ steps.version.outputs.new_tag }}" == "${{ steps.version.outputs.old_tag }}" ]]; then
             echo "Version not changed"
             exit 1
           else
