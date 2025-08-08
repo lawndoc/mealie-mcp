@@ -6,7 +6,7 @@ A Model Context Protocol (MCP) service for Mealie, the recipe management and mea
 
 ## Overview
 
-This project provides a MCP wrapper around the Mealie API, allowing AI assistants to interact with your Mealie instance. It enables functionality like:
+This project provides a FastMCP-based MCP wrapper around the Mealie API, allowing AI assistants to interact with your Mealie instance. It enables functionality like:
 
 - Searching and retrieving recipes
 - Managing meal plans
@@ -63,6 +63,13 @@ MEALIE_MCP_LOG_FILE="/var/log/mealie-mcp.log"
 
 ## Features
 
+### Health & Connectivity
+
+Tools:
+
+- `ping` – simple liveness probe returning `"pong"` to verify the MCP transport.
+- `check_connection` – performs a lightweight authenticated request (recipes list) to verify Mealie API connectivity.
+
 ### Recipe Management
 
 Tools:
@@ -89,14 +96,45 @@ Tools:
 
 ## Development
 
-You must use [`uv`](https://docs.astral.sh/uv/) while developing this app.
+### Using `uv`
 
-### Setup
+[`uv`](https://docs.astral.sh/uv/) manages the virtual environment, dependency resolution, and common tasks:
+
+Install (one time):
 
 ```bash
-git clone https://github.com/lawndoc/mealie-mcp
-cd mealie-mcp
-uv sync
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Sync (create/update venv with all groups incl. dev):
+
+```bash
+uv sync --dev
+```
+
+Run the server (uses venv automatically):
+
+```bash
+MEALIE_URL=... MEALIE_USERNAME=... MEALIE_PASSWORD=... uv run mealie_mcp --transport sse
+```
+
+Run tests:
+
+```bash
+uv run pytest -q
+```
+
+Upgrade all dependencies (respecting version constraints):
+
+```bash
+uv lock --upgrade
+uv sync --dev
+```
+
+Build a wheel / sdist (uv build backend via PEP 517):
+
+```bash
+uv build
 ```
 
 ## Technical Details
