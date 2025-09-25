@@ -1,8 +1,9 @@
+# ...existing code copied...
 import click
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 from .mealie_client import MealieClient
 from .mealie_logger import logger
 
@@ -27,19 +28,22 @@ async def app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
 
 
 mcp = FastMCP("Mealie", lifespan=app_lifespan)
-from . import meal_plans
-from . import recipes
-from . import shopping_lists
+
+# Deferred imports to register tools (avoid circular import during module init)
+from . import meal_plans  # noqa: F401,E402
+from . import recipes  # noqa: F401,E402
+from . import shopping_lists  # noqa: F401,E402
+from . import health  # noqa: F401,E402
 
 
 @click.command()
 @click.option(
     "--transport",
-    type=click.Choice(["stdio", "sse"]),
-    default="sse",  # port 8000
+    type=click.Choice(["stdio", "http"]),
+    default="http",  # port 8000
     help="Transport type",
 )
-def main(transport: str = "sse") -> None:
+def main(transport: str = "http") -> None:
     logger.info("Initializing FastMCP server for Mealie")
     try:
         mcp.run(transport=transport)
