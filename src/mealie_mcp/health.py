@@ -8,4 +8,7 @@ async def ping() -> str:
 @mcp.tool()
 async def check_connection(ctx: Context) -> dict:
     resp = await ctx.request_context.lifespan_context.client.get("/api/recipes")
-    return {"status": "ok", "http_status": resp.status_code} if resp.is_success else {"status": "error", "http_status": resp.status_code}
+    if resp.is_success:
+        return {"status": "ok", "http_status": resp.status_code}
+    else:
+        return {"status": "error", "http_status": resp.status_code}
