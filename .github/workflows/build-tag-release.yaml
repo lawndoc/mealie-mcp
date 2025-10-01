@@ -52,7 +52,7 @@ jobs:
           
       - name: Install uv
         if: ${{ steps.changed.outcome == 'success' }}
-        uses: astral-sh/setup-uv@c7f87aa956e4c323abf06d5dec078e358f6b4d04 # v6
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
 
       - name: Bump version in files
         if: ${{ steps.changed.outcome == 'success' }}
